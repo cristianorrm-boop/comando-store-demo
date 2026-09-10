@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Fontes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <!-- Ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Estilos -->
+    <link rel="stylesheet" href="styles.css" />
+    <title>COMANDO STORE | G.I. Joe & Action Figures</title>
+
+    <!-- Prévia ao compartilhar o link (WhatsApp, redes sociais, etc.) -->
+    <!-- TODO: quando o site tiver um domínio próprio, trocar og:url pela URL final -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="COMANDO STORE | G.I. Joe & Action Figures">
+    <meta property="og:description" content="Sua base de action figures G.I. Joe e Cobra. Clássicos, veículos e acessórios — Comando em Ação!">
+    <meta property="og:image" content="./assets/gijoe/wreckage-01-gijoe.jpg">
+    <meta property="og:url" content="https://SEU-DOMINIO-AQUI.com">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="COMANDO STORE | G.I. Joe & Action Figures">
+    <meta name="twitter:description" content="Sua base de action figures G.I. Joe e Cobra. Clássicos, veículos e acessórios — Comando em Ação!">
+    <meta name="twitter:image" content="./assets/gijoe/wreckage-01-gijoe.jpg">
+</head>
+
+<body>
+    <header>
+        <div class="logo">
+            <i class="fa-solid fa-helmet-battle" aria-hidden="true"></i>
+            <div class="logo-text">
+                <h1>COMANDO STORE</h1>
+                <span class="logo-subtitle">G.I. Joe & Action Figures</span>
+            </div>
+        </div>
+
+        <div class="search-container" role="search">
+            <input placeholder="Buscar missão (figura, veículo...)" class="search-input" aria-label="Buscar Produto" />
+            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        </div>
+
+        <div class="cart-icon" aria-label="Abrir carrinho" role="button" tabindex="0">
+            <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
+            <span class="cart-badge">0</span>
+        </div>
+    </header>
+
+    <div class="categories-container">
+        <nav class="categories-bar" aria-label="Categorias de produtos"><!-- botões gerados pelo script a partir do Firestore --></nav>
+    </div>
+
+    <section class="hero-section">
+        <div class="hero-content">
+            <span class="hero-tag">COMANDO EM AÇÃO</span>
+            <h2>Missão: Completar a Coleção</h2>
+            <p>Clássicos e Relíquias - Seu QG de action figures</p>
+        </div>
+    </section>
+
+    <section class="destaques-section" id="destaques-section" style="display:none">
+        <h2 class="destaques-title"><i class="fa-solid fa-star" aria-hidden="true"></i> Destaques da Semana</h2>
+        <div class="destaques-container products-container"><!-- cards gerados pelo script --></div>
+    </section>
+
+    <main class="products">
+        <div class="products-container"><!-- cards gerados pelo script --></div>
+    </main>
+
+    <div class="cart-overlay"></div>
+
+    <aside class="cart-sidebar" aria-label="Carrinho">
+        <div class="cart-header">
+            <h3>Base Móvel <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i></h3>
+            <button class="close-cart-btn" aria-label="Fechar carrinho">&times;</button>
+        </div>
+
+        <div class="cart-body"></div>
+
+        <div class="cart-footer">
+            <div class="options-toggle" role="tablist">
+                <button class="delivery-btn active" data-option="delivery" role="tab" aria-selected="true">
+                    <i class="fa-solid fa-truck-fast" aria-hidden="true"></i> Entrega (Missão)
+                </button>
+                <button class="delivery-btn" data-option="pickup" role="tab" aria-selected="false">
+                    <i class="fa-solid fa-store" aria-hidden="true"></i> Retirada (Base)
+                </button>
+            </div>
+
+            <div id="delivery-form-container">
+                <div class="form-group">
+                    <label for="delivery-name">Nome do Comandante</label>
+                    <input type="text" id="delivery-name" placeholder="Nome e sobrenome" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="delivery-phone">Telefone (Comunicação via WhatsApp)</label>
+                    <input type="tel" id="delivery-phone" placeholder="(XX) XXXXX-XXXX" maxlength="15" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="delivery-cep">CEP (Localização da Base)</label>
+                    <input type="text" id="delivery-cep" placeholder="00000-000" maxlength="9" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="delivery-address">Endereço da Missão</label>
+                    <textarea id="delivery-address" placeholder="Rua, número, complemento" required></textarea>
+                </div>
+
+                <div class="delivery-fee-notice">
+                    🚁 Taxa de entrega calculada de acordo com sua região
+                </div>
+
+                <div class="payment-options-container">
+                    <h4>Forma de Pagamento (Munição)</h4>
+
+                    <label class="payment-option selected">
+                        <input type="radio" name="payment" value="PIX" checked> PIX (Transferência Imediata)
+                    </label>
+
+                    <label class="payment-option">
+                        <input type="radio" name="payment" value="Cartão de Crédito"> Cartão de Crédito
+                    </label>
+
+                    <label class="payment-option">
+                        <input type="radio" name="payment" value="Cartão de Débito"> Cartão de Débito
+                    </label>
+
+                    <label class="payment-option">
+                        <input type="radio" name="payment" value="Dinheiro"> Dinheiro (Físico)
+                    </label>
+
+                    <div id="troco-container">
+                        <div class="form-group">
+                            <label for="troco-para">Precisa de troco para quanto?</label>
+                            <input type="number" id="troco-para" placeholder="Ex: 50">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="pickup-form-container" style="display: none;">
+                <div class="form-group">
+                    <label for="pickup-name">Nome para Retirada</label>
+                    <input type="text" id="pickup-name" placeholder="Nome do comandante" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Agendar Retirada (Horário da Missão)</label>
+                    <div class="date-time-row">
+                        <input type="date" id="pickup-date" required>
+                        <select id="pickup-time" required>
+                            <option value="" disabled selected>Horário</option>
+                            <!-- opções geradas pelo script a partir das configurações da loja -->
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="coupon-container">
+                <input type="text" id="coupon-input" placeholder="Código de Missão (CUPOM)">
+                <button id="apply-coupon-btn">Ativar</button>
+            </div>
+
+            <p id="coupon-feedback" class="coupon-feedback"></p>
+
+            <div class="cart-summary">
+                <div class="summary-line"><span>Subtotal (Munição)</span><span id="cart-subtotal">R$ 0,00</span></div>
+                <div class="summary-line discount-line" style="display: none;">
+                    <span>Desconto (Reforço)</span><span id="cart-discount">- R$ 0,00</span>
+                </div>
+                <div class="summary-line total"><span>Total da Missão</span><span id="cart-total">R$ 0,00</span></div>
+            </div>
+        </div>
+
+        <div class="finish-order-btn-container">
+            <button id="finish-order-btn" class="finish-order-btn" disabled>
+                <i class="fab fa-whatsapp" aria-hidden="true"></i> Finalizar Missão
+            </button>
+        </div>
+    </aside>
+
+    <div class="view-cart-banner" aria-live="polite">
+        <p>Total da Missão: <span id="banner-total">R$ 0,00</span></p>
+        <button class="view-cart-banner-btn">Ver Base Móvel</button>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">
+                <i class="fa-solid fa-helmet-battle"></i>
+                <span>COMANDO STORE</span>
+            </div>
+            <p>© 2025 - COMANDO STORE - Seu QG de G.I. Joe & Action Figures no Brasil</p>
+            <p class="footer-note">"Ação com você no comando" 🇧🇷</p>
+        </div>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="./firebase-config.js"></script>
+    <script src="./script.js"></script>
+</body>
+
+</html>
