@@ -561,6 +561,82 @@
       font-weight: 800;
       color: var(--primary)
     }
+
+    /* ===== MENU MOBILE (sanduíche) ===== */
+    .hamburger-btn {
+      display: none;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      width: 38px;
+      height: 38px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1.05rem;
+      flex-shrink: 0;
+    }
+
+    .sidebar-overlay {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .hamburger-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .topbar h1 {
+        font-size: .95rem;
+        flex: 1;
+        text-align: center;
+      }
+
+      .layout {
+        position: relative;
+      }
+
+      .sidebar {
+        position: fixed;
+        top: 58px;
+        left: 0;
+        bottom: 0;
+        z-index: 200;
+        transform: translateX(-100%);
+        transition: transform .25s ease;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, .5);
+        overflow-y: auto;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .sidebar-overlay {
+        position: fixed;
+        top: 58px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, .6);
+        z-index: 150;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .25s ease;
+      }
+
+      .sidebar-overlay.show {
+        display: block;
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .content {
+        padding: 1rem;
+        width: 100%;
+      }
+    }
   </style>
 </head>
 
@@ -583,12 +659,14 @@
   <!-- ===== APP ===== -->
   <div id="app">
     <div class="topbar">
+      <button class="hamburger-btn" onclick="alternarMenu()" aria-label="Abrir menu"><i class="fa-solid fa-bars"></i></button>
       <h1><i class="fa-solid fa-helmet-battle"></i>Comando Store — Admin</h1>
       <button id="logout-btn" onclick="fazerLogout()"><i class="fa-solid fa-right-from-bracket"></i> Sair</button>
     </div>
 
     <div class="layout">
-      <nav class="sidebar">
+      <div class="sidebar-overlay" id="sidebar-overlay" onclick="alternarMenu(false)"></div>
+      <nav class="sidebar" id="sidebar">
         <button class="side-btn active" onclick="mudarTab('produtos', this)"><i class="fa-solid fa-box"></i>
           Produtos</button>
         <button class="side-btn" onclick="mudarTab('categorias', this)"><i class="fa-solid fa-border-all"></i>
@@ -1071,6 +1149,16 @@
       document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
       btn.classList.add("active");
       document.getElementById("tab-" + tab).classList.add("active");
+      alternarMenu(false);
+    }
+
+    // Menu sanduíche (mobile): abre/fecha a barra lateral por cima do conteúdo
+    function alternarMenu(forcarEstado) {
+      const sidebar = document.getElementById("sidebar");
+      const overlay = document.getElementById("sidebar-overlay");
+      const abrir = typeof forcarEstado === "boolean" ? forcarEstado : !sidebar.classList.contains("open");
+      sidebar.classList.toggle("open", abrir);
+      overlay.classList.toggle("show", abrir);
     }
 
     function fecharModal(id) {
