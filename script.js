@@ -217,7 +217,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             <div class="product-card" data-id="${p.id}" data-categoria="${p.categoria}" style="position:relative;">
                 ${badgeEsgotado}
                 <img class="product-img" src="${p.imagem}" alt="${p.nome}"
-                     onerror="this.src='https://via.placeholder.com/300x300?text=COMANDO+STORE'">
+                     onerror="this.onerror=null;this.src='./assets/placeholder.svg'">
                 ${galeriaThumbs}
                 <div class="product-info">
                     <h3 class="product-name">${p.nome}</h3>

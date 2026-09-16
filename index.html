@@ -16,6 +16,11 @@
     <link rel="stylesheet" href="styles.css" />
     <title>COMANDO STORE | G.I. Joe & Action Figures</title>
 
+    <!-- App instalável (PWA) -->
+    <link rel="manifest" href="./manifest.json" />
+    <meta name="theme-color" content="#E5B80B" />
+    <link rel="apple-touch-icon" href="./assets/gijoe/wreckage-01-gijoe.jpg" />
+
     <!-- Prévia ao compartilhar o link (WhatsApp, redes sociais, etc.) -->
     <!-- TODO: quando o site tiver um domínio próprio, trocar og:url pela URL final -->
     <meta property="og:type" content="website">
@@ -205,6 +210,13 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="./firebase-config.js"></script>
     <script src="./script.js"></script>
+    <script>
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", () => {
+                navigator.serviceWorker.register("./sw.js").catch(() => { });
+            });
+        }
+    </script>
 </body>
 
 </html>

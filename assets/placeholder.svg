@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <rect width="240" height="240" fill="#EEEEEE"/>
+  <rect x="60" y="70" width="120" height="100" rx="8" fill="#DADADA"/>
+  <circle cx="92" cy="100" r="12" fill="#BEBEBE"/>
+  <path d="M70 150 L105 115 L130 140 L150 118 L172 150 Z" fill="#BEBEBE"/>
+</svg>

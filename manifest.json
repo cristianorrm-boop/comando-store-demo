@@ -1,0 +1,22 @@
+{
+  "name": "Comando Store",
+  "short_name": "Comando Store",
+  "description": "G.I. Joe & Action Figures",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0F1A1A",
+  "theme_color": "#E5B80B",
+  "icons": [
+    {
+      "src": "./assets/gijoe/wreckage-01-gijoe.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "./assets/gijoe/wreckage-01-gijoe.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
