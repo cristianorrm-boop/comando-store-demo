@@ -1,10 +1,10 @@
-const CACHE_NAME = "comando-store-shell-v1";
+const CACHE_NAME = "comando-store-shell-v2";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css",
-  "./script.js",
-  "./firebase-config.js",
+  "./styles.css?v=20261021",
+  "./script.js?v=20261021",
+  "./firebase-config.js?v=20261021",
   "./manifest.json",
 ];
 

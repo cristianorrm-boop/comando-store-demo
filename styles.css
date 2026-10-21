@@ -188,9 +188,32 @@ header{
 .cart-header h3 i{margin-left:0.5rem;color:var(--primary);}
 .close-cart-btn{background:none;border:none;font-size:2rem;cursor:pointer;color:var(--text);}
 
-.cart-body{padding:1.5rem;overflow-y:auto;flex-shrink:1}
+.cart-body{padding:1.5rem;overflow-y:auto;flex:1 1 auto;min-height:0}
 .cart-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);background:var(--secondary);overflow-y:auto;flex-grow:1}
-.finish-order-btn-container{padding:1rem 1.5rem;border-top:2px solid var(--border);background:var(--card-bg);}
+.finish-order-btn-container{padding:1rem 1.5rem;border-top:2px solid var(--border);background:var(--card-bg);display:flex;gap:.7rem;}
+
+/* Carrinho em duas etapas: 1) só os itens (Arsenal), 2) dados de
+   entrega/retirada + pagamento (Missão) — só uma fica visível por vez. */
+.cart-step-indicator{
+  display:flex;align-items:center;justify-content:center;gap:.6rem;
+  padding:.7rem 1.5rem;border-bottom:2px solid var(--primary);
+  background:var(--secondary);font-size:.78rem;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:1px;
+}
+.cart-step-indicator .step{display:flex;align-items:center;gap:.4rem;opacity:.55;transition:opacity .2s,color .2s}
+.cart-step-indicator .step.active{opacity:1;color:var(--primary);font-weight:800}
+.cart-step-indicator .step-sep{opacity:.4;font-size:.7rem}
+.cart-step{display:flex;flex-direction:column;flex:1 1 auto;min-height:0;overflow:hidden}
+.cart-step1-resumo{padding:1rem 1.5rem 0;border-top:1px solid var(--border)}
+.cart-step1-resumo .summary-line{display:flex;justify-content:space-between;margin-bottom:.4rem;font-size:.95rem;color:var(--text-muted)}
+.cart-step1-resumo .summary-line.total{font-size:1.2rem;font-weight:800;color:var(--text)}
+.cart-step1-resumo .summary-line.total span:last-child{color:var(--primary)}
+.btn-voltar-carrinho{
+  flex:0 0 auto;padding:1rem 1.1rem;font-size:1rem;font-weight:700;
+  background:transparent;color:var(--text);border:2px solid var(--border);border-radius:.7rem;cursor:pointer;
+  transition:border-color .2s,color .2s;text-transform:uppercase;letter-spacing:1px;
+}
+.btn-voltar-carrinho:hover{border-color:var(--primary);color:var(--primary)}
 
 /* Opções entrega/retirada */
 .options-toggle{display:flex;border:2px solid var(--border);border-radius:999px;overflow:hidden;margin-bottom:1.2rem;background:var(--card-bg)}
@@ -226,7 +249,7 @@ header{
 #apply-coupon-btn:hover{background:var(--primary-dark);}
 
 .finish-order-btn{
-  width:100%;padding:1rem;font-size:1.1rem;font-weight:800;color:var(--cobra);
+  flex:1;padding:1rem;font-size:1.1rem;font-weight:800;color:var(--cobra);
   background:var(--primary);
   border:2px solid var(--primary-dark);border-radius:.7rem;cursor:pointer;transition:filter .2s, transform .1s;
   box-shadow:0 10px 26px rgba(229,184,11,0.3);

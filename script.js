@@ -38,6 +38,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     const categoriesBar = document.querySelector(".categories-bar");
     const searchInput = document.querySelector(".search-input");
     const finishOrderBtn = document.getElementById("finish-order-btn");
+    // Carrinho em duas etapas: 1) só os itens (Arsenal), 2) dados de entrega/retirada + pagamento (Missão)
+    const cartStep1 = document.getElementById("cart-step-1");
+    const cartStep2 = document.getElementById("cart-step-2");
+    const stepIndicator1 = document.getElementById("step-indicator-1");
+    const stepIndicator2 = document.getElementById("step-indicator-2");
+    const continuarDadosBtn = document.getElementById("continuar-dados-btn");
+    const voltarCarrinhoBtn = document.getElementById("voltar-carrinho-btn");
+    const subtotalStep1Elem = document.getElementById("cart-subtotal-step1");
+    const totalStep1Elem = document.getElementById("cart-total-step1");
     const viewCartBanner = document.querySelector(".view-cart-banner");
     const bannerTotalElem = document.getElementById("banner-total");
     const viewCartBannerBtn = document.querySelector(".view-cart-banner-btn");
@@ -137,6 +146,22 @@ document.addEventListener("DOMContentLoaded", async () => {
         cartSidebar.classList.remove("show");
         cartOverlay.classList.remove("show");
         document.body.style.overflow = "auto";
+    };
+
+    const irParaEtapaDados = () => {
+        if (!carrinho.length) return;
+        cartStep1.style.display = "none";
+        cartStep2.style.display = "flex";
+        stepIndicator1.classList.remove("active");
+        stepIndicator2.classList.add("active");
+        const footerEl = cartStep2.querySelector(".cart-footer");
+        if (footerEl) footerEl.scrollTop = 0;
+    };
+    const voltarParaCarrinho = () => {
+        cartStep2.style.display = "none";
+        cartStep1.style.display = "flex";
+        stepIndicator2.classList.remove("active");
+        stepIndicator1.classList.add("active");
     };
 
     // ===== EFEITO FLY TO CART =====
@@ -342,10 +367,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
         
         totalElem.textContent = formatarMoeda(total);
+        subtotalStep1Elem.textContent = formatarMoeda(subtotal);
+        totalStep1Elem.textContent = formatarMoeda(subtotal);
         cartBadge.textContent = carrinho.reduce((acc, item) => acc + item.quantidade, 0);
         bannerTotalElem.textContent = formatarMoeda(total);
-        
+
         finishOrderBtn.disabled = carrinho.length === 0;
+        continuarDadosBtn.disabled = carrinho.length === 0;
         
         if (carrinho.length > 0 && window.innerWidth <= 768) {
             viewCartBanner.classList.add("show");
@@ -448,6 +476,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             return;
         }
 
+        // Abre a aba do WhatsApp JÁ AGORA (ainda em branco), antes de qualquer
+        // "await" — no celular, se o window.open vier depois de um await, o
+        // navegador não reconhece mais como ação direta do clique e bloqueia
+        // o pop-up silenciosamente.
+        const abaWhatsApp = window.open("", "_blank");
+
         const numeroWhatsApp = configLoja.whatsapp;
 
         const itensPedido = carrinho
@@ -517,7 +551,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
-        window.open(url, "_blank");
+        if (abaWhatsApp) {
+            abaWhatsApp.location.href = url;
+        } else {
+            // navegador bloqueou mesmo assim (raro) — tenta de novo
+            window.open(url, "_blank");
+        }
     };
 
     // ===== EVENTOS =====
@@ -527,6 +566,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     viewCartBannerBtn.addEventListener("click", abrirCarrinho);
     applyCouponBtn.addEventListener("click", applyCoupon);
     finishOrderBtn.addEventListener("click", finalizarPedido);
+    continuarDadosBtn.addEventListener("click", irParaEtapaDados);
+    voltarCarrinhoBtn.addEventListener("click", voltarParaCarrinho);
 
     // CATEGORIAS (delegação, pois os botões são gerados dinamicamente)
     categoriesBar.addEventListener("click", (e) => {
@@ -604,6 +645,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // INICIAR
     await carregarDados();
+
+    // Reordena os produtos: primeiro pela ordem das categorias (a mesma
+    // que já define a barra de categorias: Gi Joe, Cobra, Veículos,
+    // Acessórios, Kits), e dentro de cada categoria pelo id (ordem de
+    // cadastro). Sem isso a grade seguia a ordem de "criadoEm", misturando
+    // as categorias.
+    const posicaoCategoriaPorId = {};
+    categorias.forEach((c, idx) => { posicaoCategoriaPorId[c.id] = idx; });
+    produtos.sort((a, b) => {
+        const pa = posicaoCategoriaPorId[a.categoria] ?? 9999;
+        const pb = posicaoCategoriaPorId[b.categoria] ?? 9999;
+        if (pa !== pb) return pa - pb;
+        return (Number(a.id) || 0) - (Number(b.id) || 0);
+    });
+
     renderizarCategorias();
     renderizarHorariosRetirada();
     renderizarDestaques();
