@@ -665,4 +665,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderizarDestaques();
     filtrarEMostrarProdutos();
     atualizarCarrinho();
+
+    // Botão flutuante de WhatsApp (fala direto com a loja, fora do checkout)
+    const botaoWhatsapp = document.createElement("a");
+    botaoWhatsapp.className = "whatsapp-float";
+    botaoWhatsapp.target = "_blank";
+    botaoWhatsapp.rel = "noopener";
+    botaoWhatsapp.setAttribute("aria-label", "Falar no WhatsApp");
+    botaoWhatsapp.innerHTML = `<i class="fab fa-whatsapp" aria-hidden="true"></i>`;
+    botaoWhatsapp.href = `https://wa.me/${configLoja.whatsapp}?text=${encodeURIComponent("Olá, Comando! Preciso de reforços (tenho uma dúvida).")}`;
+    document.body.appendChild(botaoWhatsapp);
 });

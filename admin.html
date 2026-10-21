@@ -748,7 +748,10 @@
             <h2>Pedidos Online</h2>
           </div>
           <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:1rem">Pedidos feitos pelos clientes no site
-            (checkout via WhatsApp). Isso é só um histórico — o pedido em si já foi enviado pro seu WhatsApp.</p>
+            (checkout via WhatsApp). O pedido em si já foi enviado pro seu WhatsApp — aqui é só o histórico.
+            <strong>Clique em <i class="fa-solid fa-check"></i> "Marcar como atendido" depois de confirmar/entregar o
+              pedido</strong>: só então ele entra como venda no Relatório (evita contar como faturamento um pedido
+            que ainda não foi confirmado).</p>
           <div style="overflow-x:auto">
             <table>
               <thead>
@@ -866,6 +869,14 @@
             <div class="form-group">
               <label>Mês</label>
               <input type="month" id="relatorio-mes">
+            </div>
+            <div class="form-group">
+              <label>Origem</label>
+              <select id="relatorio-filtro-origem" onchange="renderizarRelatorioTabela()">
+                <option value="todas">Todas as vendas</option>
+                <option value="loja">Só loja (PDV)</option>
+                <option value="online">Só online (site)</option>
+              </select>
             </div>
             <div class="form-group">
               <button class="btn btn-primary" style="width:100%" onclick="gerarRelatorio()"><i
@@ -1111,6 +1122,7 @@
     let _arquivosSelecionados = { 1: null, 2: null };
     let pdvCarrinho = [];
     let pdvCupomAplicado = null;
+    let vendasRelatorioAtual = [];
 
     const fmtMoeda = (v) => (v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
@@ -1596,15 +1608,55 @@
               <button class="icon-btn" onclick="alternarAtendidoPedido('${p.docId}', ${!atendido})" title="${atendido ? "Marcar como novo" : "Marcar como atendido"}">
                 <i class="fa-solid ${atendido ? "fa-rotate-left" : "fa-check"}"></i>
               </button>
+              <button class="icon-btn danger" onclick="confirmarExclusaoPedido('${p.docId}')" title="Excluir pedido">
+                <i class="fa-solid fa-trash"></i>
+              </button>
             </td>
           </tr>
         `;
       }).join("");
     }
 
+    // Marcar como atendido gera uma venda (mesmo formato do PDV), só que
+    // etiquetada com "pedidoOrigem" — assim o faturamento do site entra na
+    // conta do Relatório, sem duplicar se a pessoa marcar/desmarcar várias
+    // vezes (só gera a venda uma vez, controlado por "vendaGerada" no pedido).
     async function alternarAtendidoPedido(docId, novoValor) {
-      await db.collection("pedidos").doc(docId).update({ atendido: novoValor });
+      const atualizacao = { atendido: novoValor };
+
+      if (novoValor) {
+        const doc = await db.collection("pedidos").doc(docId).get();
+        const p = doc.data();
+        if (p && !p.vendaGerada) {
+          const vendaRef = await db.collection("vendas").add({
+            itens: (p.itens || []).map((i) => ({ nome: i.nome, preco: i.preco, qtd: i.qtd })),
+            subtotal: p.subtotal ?? p.total ?? 0,
+            desconto: p.desconto ?? 0,
+            total: p.total ?? 0,
+            pagamento: p.cliente?.pagamento || "A combinar",
+            cliente: p.cliente?.nome || (p.tipoEntrega === "delivery" ? "Cliente (entrega)" : "Cliente (retirada)"),
+            cupom: p.cupom || null,
+            pedidoOrigem: { pedidoId: docId, origem: p.tipoEntrega },
+            criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+          atualizacao.vendaGerada = true;
+          atualizacao.vendaId = vendaRef.id;
+        }
+      }
+
+      await db.collection("pedidos").doc(docId).update(atualizacao);
       await carregarPedidos();
+    }
+
+    function confirmarExclusaoPedido(docId) {
+      document.getElementById("confirmar-texto").textContent = "Tem certeza que deseja excluir este pedido?";
+      const btn = document.getElementById("confirmar-btn");
+      btn.onclick = async () => {
+        await db.collection("pedidos").doc(docId).delete();
+        fecharModal("modal-confirmar");
+        await carregarPedidos();
+      };
+      document.getElementById("modal-confirmar").classList.add("show");
     }
 
     // ===== PDV =====
@@ -1721,6 +1773,12 @@
       alert("Venda registrada com sucesso!");
     }
 
+    function origemBadge(v) {
+      return v.pedidoOrigem
+        ? ` <span class="badge" style="background:var(--primary);color:var(--cobra)">Online · ${v.pedidoOrigem.origem === "delivery" ? "Entrega" : "Retirada"}</span>`
+        : "";
+    }
+
     async function carregarVendasHoje() {
       const inicioHoje = new Date();
       inicioHoje.setHours(0, 0, 0, 0);
@@ -1746,7 +1804,7 @@
           return `
             <tr>
               <td>${hora}</td>
-              <td>${v.cliente || "—"}</td>
+              <td>${v.cliente || "—"}${origemBadge(v)}</td>
               <td>${itensTxt}</td>
               <td>${v.pagamento}</td>
               <td>${fmtMoeda(v.total)}</td>
@@ -1775,7 +1833,15 @@
         .orderBy("criadoEm", "desc")
         .get();
 
-      const vendas = snap.docs.map((d) => d.data());
+      vendasRelatorioAtual = snap.docs.map((d) => d.data());
+      renderizarRelatorioTabela();
+    }
+
+    function renderizarRelatorioTabela() {
+      const filtro = document.getElementById("relatorio-filtro-origem")?.value || "todas";
+      let vendas = vendasRelatorioAtual;
+      if (filtro === "loja") vendas = vendas.filter((v) => !v.pedidoOrigem);
+      if (filtro === "online") vendas = vendas.filter((v) => !!v.pedidoOrigem);
 
       const totalVendas = vendas.length;
       const faturamento = vendas.reduce((acc, v) => acc + (v.total || 0), 0);
@@ -1808,7 +1874,7 @@
           return `
             <tr>
               <td>${data}</td>
-              <td>${v.cliente || "—"}</td>
+              <td>${v.cliente || "—"}${origemBadge(v)}</td>
               <td>${itensTxt}</td>
               <td>${v.pagamento}</td>
               <td>${fmtMoeda(v.total)}</td>
