@@ -8,10 +8,10 @@
   --primaria: #4f46e5;
   --secundaria: #111827;
   --bg: #f6f7fb;
-  --card: #fff;
+  --card: #1A2A2A;
   --texto: #1f2937;
   --suave: #6b7280;
-  --borda: #e5e7eb;
+  --borda: #2A3A2A;
   --ok: #16a34a;
   --erro: #dc2626;
   --raio: 12px;
@@ -21,7 +21,7 @@ body { font-family: var(--fonte); background: var(--bg); color: var(--texto); li
 body.no-scroll { overflow: hidden; }
 img { max-width: 100%; display: block; }
 button { font: inherit; cursor: pointer; border: 0; background: none; color: inherit; }
-input, select, textarea { font: inherit; width: 100%; padding: 10px 12px; border: 1px solid var(--borda); border-radius: var(--raio-pq); background: #fff; color: var(--texto); }
+input, select, textarea { font: inherit; width: 100%; padding: 10px 12px; border: 1px solid var(--borda); border-radius: var(--raio-pq); background: var(--card); color: var(--texto); }
 input:focus, select:focus, textarea:focus { outline: 2px solid var(--primaria); outline-offset: -1px; }
 [hidden] { display: none !important; }
 
