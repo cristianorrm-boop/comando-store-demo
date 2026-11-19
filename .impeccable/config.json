@@ -1,0 +1,119 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-10-21T03:20:33.663Z",
+        "reason": "pre-existing Comando Store brand glow effect, predates this session; cart two-step edit didn't touch shadows"
+      },
+      {
+        "rule": "low-contrast",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-10-21T03:20:33.907Z",
+        "reason": "pre-existing text/bg pairing, predates this session; disclosed to user, not part of current cart task"
+      },
+      {
+        "rule": "low-contrast",
+        "value": "*",
+        "files": [
+          "admin.html"
+        ],
+        "createdAt": "2026-10-21T03:20:34.178Z",
+        "reason": "pre-existing text/bg pairing, predates this session; disclosed to user, not part of current cart task"
+      },
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "admin.html"
+        ],
+        "createdAt": "2026-10-21T03:20:34.484Z",
+        "reason": "pre-existing placeholder image tag in admin, predates this session; disclosed to user"
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-10-21T03:21:29.903Z",
+        "reason": "pre-existing Comando Store card accent borders, predates this session; disclosed to user"
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "styles.css"
+        ],
+        "createdAt": "2026-10-21T03:21:30.159Z",
+        "reason": "pre-existing Comando Store card accent borders, predates this session; disclosed to user"
+      },
+      {
+        "rule": "overused-font",
+        "value": "montserrat",
+        "createdAt": "2026-10-21T03:21:30.414Z",
+        "reason": "pre-existing site font, predates this session; disclosed to user"
+      },
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-10-21T03:21:30.659Z",
+        "reason": "pre-existing site font, predates this session; disclosed to user"
+      },
+      {
+        "rule": "kicker-above-heading",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-10-21T03:21:30.926Z",
+        "reason": "pre-existing hero kicker text, predates this session; disclosed to user"
+      },
+      {
+        "rule": "repeated-container-text",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-10-21T03:21:31.201Z",
+        "reason": "pre-existing R$ 0,00 placeholder spans across cart summary blocks, predates this session; disclosed to user"
+      },
+      {
+        "rule": "border-accent-on-rounded",
+        "value": "*",
+        "files": [
+          "admin.html"
+        ],
+        "createdAt": "2026-10-21T03:21:31.458Z",
+        "reason": "pre-existing admin card style, predates this session; disclosed to user"
+      },
+      {
+        "rule": "icon-tile-stack",
+        "value": "*",
+        "files": [
+          "admin.html"
+        ],
+        "createdAt": "2026-10-21T03:21:31.734Z",
+        "reason": "pre-existing admin header icon tile, predates this session; disclosed to user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "css/admin.css"
+        ],
+        "createdAt": "2026-11-19T14:04:39.682Z",
+        "reason": "Linha vermelha do scanner de código de barras (câmera do PDV) simula um laser real — efeito funcional intencional, não decoração"
+      }
+    ]
+  }
+}

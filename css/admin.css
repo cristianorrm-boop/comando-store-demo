@@ -1,4 +1,4 @@
-:root { --primaria: #4f46e5; --on-primaria: #fff; --bg: #f3f4f8; --card: #fff; --texto: #1f2937; --suave: #6b7280; --borda: #e5e7eb; --ok: #16a34a; --erro: #dc2626; --aviso: #d97706; --side: var(--primaria); }
+:root { --primaria: #2563eb; --on-primaria: #fff; --bg: #f3f4f8; --card: #fff; --texto: #1f2937; --suave: #6b7280; --borda: #e5e7eb; --ok: #16a34a; --erro: #dc2626; --aviso: #d97706; --side: var(--primaria); }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--texto); }
 button { font: inherit; cursor: pointer; border: 0; background: none; color: inherit; }
@@ -57,7 +57,7 @@ td.acoes { white-space: nowrap; text-align: right; }
 .status { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: .75rem; font-weight: 700; }
 .s-novo { background: #dbeafe; color: #1d4ed8; }
 .s-confirmado { background: #fef3c7; color: #b45309; }
-.s-enviado { background: #ede9fe; color: #6d28d9; }
+.s-enviado { background: #e2e8f0; color: #334155; }
 .s-entregue { background: #dcfce7; color: #15803d; }
 .s-cancelado { background: #fee2e2; color: #b91c1c; }
 .s-ativo { background: #dcfce7; color: #15803d; }
@@ -280,7 +280,7 @@ label small.dica { display: block; font-weight: 400; margin-top: 2px; }
 .cfg-barra { position: sticky; bottom: 0; display: flex; justify-content: flex-end; align-items: center; gap: 14px; padding: 12px 0 4px; margin-top: 6px; background: linear-gradient(transparent, #fff 30%); }
 
 /* pré-visualização do tema */
-.prev-loja { --p: #4f46e5; --op: #fff; --s: #111827; --os: #fff; --d: #dc2626; --od: #fff; --f: #f6f7fb; --t: #1f2937; --rr: 10px; border: 1px solid var(--borda); border-radius: 12px; overflow: hidden; background: var(--f); color: var(--t); font-size: .85rem; }
+.prev-loja { --p: #2563eb; --op: #fff; --s: #111827; --os: #fff; --d: #dc2626; --od: #fff; --f: #f6f7fb; --t: #1f2937; --rr: 10px; border: 1px solid var(--borda); border-radius: 12px; overflow: hidden; background: var(--f); color: var(--t); font-size: .85rem; }
 .pl-topo { background: var(--p); color: var(--op); display: flex; gap: 14px; align-items: center; padding: 10px 14px; }
 .pl-topo b { margin-right: auto; }
 .pl-topo span { opacity: .85; padding: 3px 10px; border-radius: 999px; }
