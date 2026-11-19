@@ -1,41 +1,86 @@
-# Regras do Firestore — COMANDO STORE
-
-Cole isto em **Firebase Console → Firestore Database → Regras**, substituindo o conteúdo padrão, e clique em "Publicar".
-
-```
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // E-mails com acesso de administrador (cadastre o mesmo e-mail em Authentication → Users)
+    function emailsAdmin() {
+      return ['admin@gmail.com'];
+    }
+
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email != null
+        && request.auth.token.email.lower() in emailsAdmin();
+    }
+
     match /produtos/{doc} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
+
     match /categorias/{doc} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
+
     match /cupons/{doc} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
+
     match /configuracoes/{doc} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
+
+    match /fretes/{doc} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Consulta pública do cliente: só por código (get). Listar é do admin.
+    // Não guarda telefone nem endereço.
+    match /acompanhamento/{codigo} {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create: if isAdmin()
+                    || (request.resource.data.status == 'novo'
+                        && request.resource.data.codigo == codigo
+                        && codigo.size() >= 8 && codigo.size() <= 12);
+      allow update, delete: if isAdmin();
+    }
+
+    // Gestão interna (PDV, caixa e financeiro): só administrador
     match /vendas/{doc} {
-      allow read, write: if request.auth != null;
+      allow read, write: if isAdmin();
     }
+
+    match /caixas/{doc} {
+      allow read, write: if isAdmin();
+    }
+
+    match /contas/{doc} {
+      allow read, write: if isAdmin();
+    }
+
+    match /movimentos/{doc} {
+      allow read, write: if isAdmin();
+    }
+
+    match /clientes/{doc} {
+      allow read, write: if isAdmin();
+    }
+
     match /pedidos/{doc} {
-      allow create: if true;
-      allow read, update, delete: if request.auth != null;
+      allow create: if request.resource.data.codigo == doc
+                    && request.resource.data.keys().hasAll(['itens', 'total', 'tipo', 'cliente', 'status', 'codigo'])
+                    && request.resource.data.status == 'novo'
+                    && request.resource.data.itens is list
+                    && request.resource.data.itens.size() > 0
+                    && request.resource.data.itens.size() <= 50
+                    && request.resource.data.total is number
+                    && request.resource.data.total >= 0;
+      allow read, update, delete: if isAdmin();
     }
   }
 }
-```
-
-**Modelo de segurança**: leitura pública (o site precisa exibir produtos/categorias/cupons sem exigir login), escrita somente para usuários autenticados (o admin logado em `admin.html`). A coleção `vendas` (registros do PDV/faturamento) é totalmente privada — leitura e escrita exigem login — pois é dado sensível do negócio que nunca deve aparecer no site público. A coleção `pedidos` (histórico de pedidos feitos pelo site) permite **criar** sem login (é o próprio cliente, no checkout, que grava o pedido) mas só o admin logado pode **ler, editar ou apagar** — isso é importante: sem essa restrição, qualquer pessoa poderia ver o nome, telefone e endereço de todos os clientes que já compraram.
-
-## Criar o usuário admin
-
-Em **Authentication → Users → Add user**, cadastre manualmente o e-mail e senha que serão usados para logar em `admin.html`. Não existe cadastro de usuário pela própria interface do admin — isso é proposital, para não deixar o painel aberto a qualquer pessoa.
