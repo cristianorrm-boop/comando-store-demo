@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Importar produtos — COMANDO STORE</title>
+  <!-- Utilitário de uso único: cadastra produtos novos em lote, sem digitar um por um
+       no admin. Edite a lista PRODUTOS abaixo (peça pra IA preencher com o que você
+       quiser cadastrar) e rode. Produtos cujo nome já existe são pulados — pode rodar
+       mais de uma vez sem duplicar. -->
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #0f1a1a; color: #eee; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 1.4rem; margin-bottom: 8px; color: #e5b80b; }
+    p  { font-size: .9rem; color: #aaa; margin-bottom: 24px; text-align: center; max-width: 540px; }
+    #btn { padding: 14px 36px; background: #e5b80b; color: #000; font-size: 1rem; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; transition: opacity .2s; }
+    #btn:disabled { opacity: .45; cursor: not-allowed; }
+    #log  { margin-top: 24px; width: 100%; max-width: 560px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 16px; font-size: .8rem; font-family: monospace; max-height: 400px; overflow-y: auto; }
+    #login-box { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 320px; margin-bottom: 20px; }
+    #login-box input { padding: 12px; border-radius: 6px; border: 1px solid #333; background: #1a1a1a; color: #eee; font-size: .9rem; }
+    #login-error { color: #f44336; font-size: .8rem; display: none; }
+    .ok   { color: #4caf50; }
+    .err  { color: #f44336; }
+    .info { color: #90caf9; }
+  </style>
+</head>
+<body>
+
+<h1>Importar produtos — COMANDO STORE</h1>
+<p id="descricao">Faça login com o usuário admin e clique no botão. Isso cadastra os produtos
+  da lista preparada, cada um com nome, preço, descrição e foto. Produtos cujo nome já
+  existir são pulados — pode rodar quantas vezes quiser.</p>
+
+<div id="login-box">
+  <input type="email" id="email-input" placeholder="E-mail do admin">
+  <input type="password" id="senha-input" placeholder="Senha">
+  <button id="login-btn">🔐 Entrar</button>
+  <span id="login-error">E-mail ou senha inválidos.</span>
+</div>
+
+<button id="btn" disabled>📦 Importar produtos</button>
+
+<div id="log"><span class="info">Faça login para habilitar a importação.</span></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="./firebase-config.js"></script>
+
+<script>
+firebase.initializeApp(window.firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
+
+const log = document.getElementById("log");
+const btn = document.getElementById("btn");
+const loginBtn = document.getElementById("login-btn");
+const loginBox = document.getElementById("login-box");
+const loginError = document.getElementById("login-error");
+
+const addLog = (msg, tipo = "ok") => {
+  const span = document.createElement("span");
+  span.className = tipo;
+  span.textContent = msg;
+  log.appendChild(span);
+  log.appendChild(document.createElement("br"));
+  log.scrollTop = log.scrollHeight;
+};
+
+loginBtn.addEventListener("click", () => {
+  const email = document.getElementById("email-input").value.trim();
+  const senha = document.getElementById("senha-input").value;
+  loginError.style.display = "none";
+  auth.signInWithEmailAndPassword(email, senha).catch(() => {
+    loginError.style.display = "block";
+  });
+});
+
+auth.onAuthStateChanged(user => {
+  if (user) {
+    loginBox.style.display = "none";
+    btn.disabled = PRODUTOS.length === 0;
+    log.innerHTML = "";
+    addLog(PRODUTOS.length ? `✔ Logado como ${user.email}. Pronto pra importar ${PRODUTOS.length} produto(s).` : "Nenhum produto na lista ainda — peça pra IA preencher o array PRODUTOS neste arquivo.", PRODUTOS.length ? "ok" : "info");
+  } else {
+    loginBox.style.display = "flex";
+    btn.disabled = true;
+  }
+});
+
+// Categorias existentes: "gijoe", "cobra", "veiculos", "acessorios", "kits"
+// (os ids exatos dos documentos em categorias/ — usar o id, não o nome, no campo categoria).
+// [nome, categoria, preco, precoAntigo, estoque, descricao, imagem, link]
+// Lista vazia por padrão — preencher quando houver produtos novos a cadastrar.
+const PRODUTOS = [];
+
+btn.addEventListener("click", async () => {
+  btn.disabled = true;
+  log.innerHTML = "";
+  addLog("▶ Iniciando importação...", "info");
+
+  try {
+    const snap = await db.collection("produtos").get();
+    const nomesExistentes = new Set(snap.docs.map(d => (d.data().nome || "").toLowerCase()));
+
+    const batch = db.batch();
+    let novos = 0;
+    PRODUTOS.forEach(([nome, categoria, preco, precoAntigo, estoque, descricao, imagem, link], i) => {
+      if (nomesExistentes.has(nome.toLowerCase())) { addLog(`– ${nome}: já existe, pulado`, "info"); return; }
+      const ref = db.collection("produtos").doc();
+      batch.set(ref, {
+        nome, categoria, preco, precoAntigo: precoAntigo || null, custo: null, estoque,
+        estoqueMinimo: null, descricao, destaque: !!precoAntigo, ativo: true, variantes: [],
+        imagem, codigo: "", link: link || null,
+      });
+      novos++;
+    });
+
+    if (novos > 0) await batch.commit();
+    addLog(`✔ ${novos} produto(s) novo(s) cadastrado(s)`, "ok");
+  } catch (e) {
+    addLog(`✘ Erro: ${e.message}`, "err");
+  }
+
+  addLog("", "info");
+  addLog("━━━ CONCLUÍDO ━━━", "info");
+  btn.disabled = false;
+});
+</script>
+</body>
+</html>
