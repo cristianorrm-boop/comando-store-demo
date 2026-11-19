@@ -23,8 +23,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const chave = (i) => i.id + "|" + i.vid;
   const ativos = () => produtos.filter((p) => p.ativo !== false);
   // categorias podem ter subcategorias (campo "pai")
-  const filhosDe = (id) => categorias.filter((c) => c.pai === id);
-  const raizes = () => categorias.filter((c) => !c.pai || !categorias.some((x) => x.id === c.pai));
+  const porOrdemCat = (x, y) => (x.ordem ?? Infinity) - (y.ordem ?? Infinity) || x.nome.localeCompare(y.nome, "pt-BR");
+  const filhosDe = (id) => categorias.filter((c) => c.pai === id).sort(porOrdemCat);
+  const raizes = () => categorias.filter((c) => !c.pai || !categorias.some((x) => x.id === c.pai)).sort(porOrdemCat);
   const idsDaCategoria = (id) => [id, ...filhosDe(id).map((c) => c.id)];
   const expandidas = new Set();
   const expandirDe = (id) => {
