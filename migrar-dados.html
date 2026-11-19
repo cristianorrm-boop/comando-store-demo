@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Migrar dados — COMANDO STORE</title>
+  <!-- Utilitário de uso único: migra os 19 produtos, 5 categorias e 2 cupons existentes pro
+       formato do loja-online (mantendo nome/categoria/preço/imagem/descrição/destaque/ativo/link,
+       acrescentando os campos novos com valor padrão), normaliza o ícone da categoria (remove o
+       prefixo "fa-solid " que o template já adiciona), grava a ordem manual original das categorias
+       (G.I. Joe, Cobra, Veículos, Acessórios, Kits), ajusta o cupom (valorMinimo -> minimo),
+       atualiza configuracoes/geral SEM apagar os valores reais já cadastrados (nomeLoja, whatsapp,
+       horários de retirada, bannerUrl) — só acrescenta os campos novos (cores do tema, retiradaDias)
+       — e remove a coleção tiposVariacao, se existir. Não apaga produtos nem pedidos. Pode rodar
+       mais de uma vez sem problema. -->
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #0f1a1a; color: #eee; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 1.4rem; margin-bottom: 8px; color: #e5b80b; }
+    p  { font-size: .9rem; color: #aaa; margin-bottom: 24px; text-align: center; max-width: 560px; }
+    #btn { padding: 14px 36px; background: #e5b80b; color: #000; font-size: 1rem; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; transition: opacity .2s; }
+    #btn:disabled { opacity: .45; cursor: not-allowed; }
+    #log  { margin-top: 24px; width: 100%; max-width: 560px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 16px; font-size: .8rem; font-family: monospace; max-height: 400px; overflow-y: auto; }
+    #login-box { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 320px; margin-bottom: 20px; }
+    #login-box input { padding: 12px; border-radius: 6px; border: 1px solid #333; background: #1a1a1a; color: #eee; font-size: .9rem; }
+    #login-error { color: #f44336; font-size: .8rem; display: none; }
+    .ok   { color: #4caf50; }
+    .err  { color: #f44336; }
+    .info { color: #90caf9; }
+  </style>
+</head>
+<body>
+
+<h1>Migrar dados — COMANDO STORE</h1>
+<p>Faça login com o usuário admin e clique no botão. Isso atualiza os 19 produtos, 5 categorias e
+  2 cupons pro formato novo (mantendo nome, categoria, preço, foto, descrição, link da ficha
+  técnica), preserva a ordem original das categorias e os dados reais da loja (nome, WhatsApp,
+  horários), e cria só os campos novos (cores do tema). Pode rodar quantas vezes quiser.</p>
+
+<div id="login-box">
+  <input type="email" id="email-input" placeholder="E-mail do admin">
+  <input type="password" id="senha-input" placeholder="Senha">
+  <button id="login-btn">🔐 Entrar</button>
+  <span id="login-error">E-mail ou senha inválidos.</span>
+</div>
+
+<button id="btn" disabled>🔄 Migrar dados</button>
+
+<div id="log"><span class="info">Faça login para habilitar a migração.</span></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="./firebase-config.js"></script>
+
+<script>
+firebase.initializeApp(window.firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
+
+const log = document.getElementById("log");
+const btn = document.getElementById("btn");
+const loginBtn = document.getElementById("login-btn");
+const loginBox = document.getElementById("login-box");
+const loginError = document.getElementById("login-error");
+
+const addLog = (msg, tipo = "ok") => {
+  const span = document.createElement("span");
+  span.className = tipo;
+  span.textContent = msg;
+  log.appendChild(span);
+  log.appendChild(document.createElement("br"));
+  log.scrollTop = log.scrollHeight;
+};
+
+loginBtn.addEventListener("click", () => {
+  const email = document.getElementById("email-input").value.trim();
+  const senha = document.getElementById("senha-input").value;
+  loginError.style.display = "none";
+  auth.signInWithEmailAndPassword(email, senha).catch(() => {
+    loginError.style.display = "block";
+  });
+});
+
+auth.onAuthStateChanged(user => {
+  if (user) {
+    loginBox.style.display = "none";
+    btn.disabled = false;
+    log.innerHTML = "";
+    addLog(`✔ Logado como ${user.email}. Pronto pra migrar.`, "ok");
+  } else {
+    loginBox.style.display = "flex";
+    btn.disabled = true;
+  }
+});
+
+// Ordem manual original das categorias, que já estava fixa no script.js antigo
+// (ORDEM_PADRAO_CATEGORIAS) — preservada como valor inicial do campo "ordem".
+const ORDEM_CATEGORIAS = { gijoe: 1, cobra: 2, veiculos: 3, acessorios: 4, kits: 5 };
+
+// Valores reais hoje hardcoded no script.js antigo (CONFIG_PADRAO) — usados só como
+// fallback se o campo ainda não existir em configuracoes/geral (nunca sobrescreve o
+// que já está lá, já que esse doc já existe com dados reais).
+const CONFIG_PADRAO = {
+  nomeLoja: "COMANDO STORE",
+  whatsapp: "5586999211027",
+  bannerUrl: "",
+  retiradaHoraInicio: "08:00",
+  retiradaHoraFim: "18:00",
+  retiradaIntervalo: 60,
+};
+
+// Apaga todos os documentos de uma coleção, em lotes de até 400.
+async function apagarColecao(nome) {
+  const snap = await db.collection(nome).get();
+  if (snap.empty) { addLog(`– ${nome}: já estava vazia`, "info"); return 0; }
+  const docs = snap.docs;
+  for (let i = 0; i < docs.length; i += 400) {
+    const batch = db.batch();
+    docs.slice(i, i + 400).forEach(d => batch.delete(d.ref));
+    await batch.commit();
+  }
+  addLog(`✔ ${nome}: ${docs.length} documento(s) apagado(s)`, "ok");
+  return docs.length;
+}
+
+btn.addEventListener("click", async () => {
+  btn.disabled = true;
+  log.innerHTML = "";
+  addLog("▶ Iniciando migração...", "info");
+
+  // 1) Categorias: normaliza o ícone (remove "fa-solid " duplicado) e grava a ordem original
+  try {
+    const snap = await db.collection("categorias").get();
+    for (const doc of snap.docs) {
+      const d = doc.data();
+      await db.collection("categorias").doc(doc.id).set({
+        nome: d.nome,
+        icone: (d.icone || "fa-tag").replace(/^fa-solid\s+/, ""),
+        ordem: d.ordem ?? ORDEM_CATEGORIAS[doc.id] ?? null,
+        pai: d.pai || null,
+      });
+    }
+    addLog(`✔ categorias: ${snap.size} migrada(s) pro formato novo`, "ok");
+  } catch (e) {
+    addLog(`✘ categorias — ${e.message}`, "err");
+  }
+
+  // 2) Produtos: mantém o que já existe, acrescenta os campos novos do loja-online.
+  // Descarta "imagem2" (base64 nunca usado em lugar nenhum da UI antiga). Preserva "link"
+  // (ficha técnica externa) e "criadoEm".
+  try {
+    const snap = await db.collection("produtos").get();
+    for (const doc of snap.docs) {
+      const d = doc.data();
+      await db.collection("produtos").doc(doc.id).set({
+        nome: d.nome, categoria: d.categoria, preco: Number(d.preco) || 0,
+        imagem: d.imagem || "", descricao: d.descricao || "",
+        destaque: d.destaque === true, ativo: d.disponivel !== false,
+        link: d.link || null,
+        estoque: d.estoque ?? 0, codigo: d.codigo || null,
+        estoqueMinimo: d.estoqueMinimo ?? null, custo: d.custo ?? null,
+        precoAntigo: d.precoAntigo ?? null,
+        variantes: d.variantes || [],
+        criadoEm: d.criadoEm || new Date().toISOString(),
+      });
+    }
+    addLog(`✔ produtos: ${snap.size} migrado(s) pro formato novo`, "ok");
+  } catch (e) {
+    addLog(`✘ produtos — ${e.message}`, "err");
+  }
+
+  // 3) Cupons: reescreve "valorMinimo" -> "minimo"
+  try {
+    const snap = await db.collection("cupons").get();
+    for (const doc of snap.docs) {
+      const d = doc.data();
+      await db.collection("cupons").doc(doc.id).set({
+        codigo: d.codigo, tipo: d.tipo, valor: d.valor,
+        minimo: d.minimo ?? d.valorMinimo ?? 0,
+        validade: d.validade ?? null,
+        ativo: d.ativo !== false,
+      });
+    }
+    addLog(`✔ cupons: ${snap.size} migrado(s) pro formato novo`, "ok");
+  } catch (e) {
+    addLog(`✘ cupons — ${e.message}`, "err");
+  }
+
+  // 4) Configurações: configuracoes/geral já existe com dados reais — faz merge, nunca
+  // sobrescreve do zero. Só acrescenta os campos novos (cores do tema, retiradaDias) e
+  // preenche com o padrão antigo qualquer campo real que por acaso esteja faltando.
+  try {
+    const ref = db.collection("configuracoes").doc("geral");
+    const snap = await ref.get();
+    const atual = snap.exists ? snap.data() : {};
+    const novo = {
+      nomeLoja: atual.nomeLoja || CONFIG_PADRAO.nomeLoja,
+      whatsapp: atual.whatsapp || CONFIG_PADRAO.whatsapp,
+      bannerUrl: atual.bannerUrl || CONFIG_PADRAO.bannerUrl,
+      corPrimaria: atual.corPrimaria || "#E5B80B",
+      corSecundaria: atual.corSecundaria || "#0F1A1A",
+      corDestaque: atual.corDestaque || "#B71C1C",
+      retiradaDias: atual.retiradaDias || [0, 1, 2, 3, 4, 5, 6],
+      retiradaHoraInicio: atual.retiradaHoraInicio || CONFIG_PADRAO.retiradaHoraInicio,
+      retiradaHoraFim: atual.retiradaHoraFim || CONFIG_PADRAO.retiradaHoraFim,
+      retiradaIntervalo: atual.retiradaIntervalo || CONFIG_PADRAO.retiradaIntervalo,
+    };
+    await ref.set(novo, { merge: true });
+    addLog("✔ configuracoes/geral: atualizada (valores reais preservados, cores novas adicionadas)", "ok");
+  } catch (e) {
+    addLog(`✘ configuracoes — ${e.message}`, "err");
+  }
+
+  // 5) tiposVariacao: coleção do modelo antigo (cor/tamanho globais) — não é usada por este
+  // projeto, mas é removida por padrão caso exista.
+  try { await apagarColecao("tiposVariacao"); } catch (e) { addLog(`✘ tiposVariacao — ${e.message}`, "err"); }
+
+  addLog("", "info");
+  addLog("━━━ CONCLUÍDO ━━━", "info");
+  btn.disabled = false;
+});
+</script>
+</body>
+</html>
