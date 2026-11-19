@@ -71,6 +71,8 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--primaria); 
 .btn-principal:hover:not(:disabled) { filter: brightness(1.1); }
 .btn-principal:disabled { background: var(--borda); color: var(--suave); cursor: not-allowed; }
 .btn-sec { padding: 10px 14px; border-radius: var(--raio-pq); border: 1px solid var(--primaria); color: var(--primaria); font-weight: 600; white-space: nowrap; }
+.produto-link-externo { display: inline-flex; gap: 6px; align-items: center; padding: 6px 10px; margin: 4px 0 6px; border: 1px solid var(--primaria); border-radius: var(--raio-pq); color: var(--primaria); font-size: 0.8rem; font-weight: 600; text-decoration: none; width: fit-content; }
+.produto-link-externo:hover { filter: brightness(1.1); }
 
 .footer { background: var(--primaria); color: var(--on-primaria); text-align: center; padding: 28px 20px; font-size: .9rem; display: grid; gap: 8px; }
 .footer a { color: inherit; text-decoration: underline; }

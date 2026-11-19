@@ -460,7 +460,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   async function formProduto(id) {
-    const p = id ? await DB.produtos.obter(id) : { nome: "", categoria: "", preco: "", precoAntigo: "", estoque: 0, descricao: "", imagem: "", destaque: false, ativo: true };
+    const p = id ? await DB.produtos.obter(id) : { nome: "", categoria: "", preco: "", precoAntigo: "", estoque: 0, descricao: "", imagem: "", destaque: false, ativo: true, link: "" };
     const cats = await DB.categorias.listar();
     let imagem = p.imagem;
     abrirModal(id ? "Editar produto" : "Novo produto", `
@@ -484,6 +484,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <div id="vars-lista"></div>
       </div>
       <label>Descrição<textarea name="descricao" rows="3">${esc(p.descricao)}</textarea></label>
+      <label>Link externo (ficha técnica, opcional)<input name="link" placeholder="https://..." value="${esc(p.link || "")}" /></label>
       <label>Imagem (envie um arquivo ou cole uma URL)
         <input type="file" id="img-arquivo" accept="image/*" />
         <input name="imagemUrl" id="img-url" placeholder="https://..." value="${p.imagem && !p.imagem.startsWith("data:") ? esc(p.imagem) : ""}" />
@@ -500,7 +501,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const item = {
           ...p, nome: d.nome.trim(), categoria: d.categoria, preco: parseFloat(d.preco), precoAntigo: parseFloat(d.precoAntigo) || 0,
           estoque: variantes.length ? variantes.reduce((t, v) => t + v.estoque, 0) : parseInt(d.estoque, 10), variantes, estoqueMinimo: d.estoqueMinimo === "" ? null : Math.max(0, parseInt(d.estoqueMinimo, 10) || 0), codigo: d.codigo.trim(), custo: d.custo === "" ? null : parseFloat(d.custo), descricao: d.descricao.trim(), imagem: url || imagem || DB.placeholder("📦", "#e5e7eb"),
-          destaque: d.destaque === "on", ativo: d.ativo === "on",
+          destaque: d.destaque === "on", ativo: d.ativo === "on", link: d.link.trim() || null,
         };
         let salvo = null;
         if (!(await tentar(async () => { salvo = await DB.produtos.salvar(item); }, "Falha ao salvar (imagem muito grande?)"))) return false;

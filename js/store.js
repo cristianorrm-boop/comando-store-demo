@@ -279,6 +279,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         ${temVariantes(p) ? `<div class="variantes" role="radiogroup" aria-label="Opções">${p.variantes.map((v) => `
           <label class="var ${v.estoque <= 0 ? "off" : ""}"><input type="radio" name="vid" value="${esc(v.id)}" ${v.estoque <= 0 ? "disabled" : ""} /><span>${esc(v.nome)}</span></label>`).join("")}</div>` : ""}
         <p class="estoque ${esgotado ? "zero" : ""}">${esgotado ? "Esgotado" : p.estoque <= 5 ? `Restam apenas ${p.estoque}` : "Em estoque"}</p>
+        ${p.link ? `<a href="${esc(p.link)}" target="_blank" rel="noopener" class="produto-link-externo"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ficha Técnica</a>` : ""}
         <button class="btn-principal" data-add="${p.id}" ${esgotado ? "disabled" : ""}>Adicionar ao carrinho</button>
       </div>`;
     $("#modal-produto").hidden = false;
