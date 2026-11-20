@@ -176,12 +176,15 @@ window.Admin.modulos.push((A) => {
         ${grade(campo("Título do banner", "bannerTitulo", c.bannerTitulo, "", "Em branco: usa o nome da loja."), campo("Texto do banner", "bannerTexto", c.bannerTexto, "", "Em branco: usa o slogan."), campo("Texto do botão do banner", "bannerBotao", c.bannerBotao))}`,
 
       inicio: `
-        ${titulo("Seções da página inicial", "A página inicial mostra, nesta ordem: banner, categorias, produtos em destaque, localização e contato.")}
+        ${titulo("Seções da página inicial", "A página inicial mostra, nesta ordem: banner, categorias, produtos em destaque, promoções, localização e contato.")}
         ${grade(marcar("Categorias", "mostrarCategorias", c.mostrarCategorias), marcar("Produtos em destaque", "mostrarDestaques", c.mostrarDestaques),
+                marcar("Produtos em promoção", "mostrarPromocoes", c.mostrarPromocoes, "Mostra automaticamente os produtos com preço antigo maior que o preço atual."),
                 marcar("Localização", "mostrarLocalizacao", c.mostrarLocalizacao), marcar("Contato", "mostrarContato", c.mostrarContato))}
         ${titulo("Títulos e textos")}
         ${grade(campo("Título das categorias", "tituloCategorias", c.tituloCategorias), campo("Título dos destaques", "tituloDestaques", c.tituloDestaques),
                 numero("Quantidade de produtos em destaque", "qtdDestaques", c.qtdDestaques, 'min="1" max="24" step="1"', "Marque os destaques em Produtos → editar produto. Sem nenhum marcado, aparecem os disponíveis."),
+                campo("Título das promoções", "tituloPromocoes", c.tituloPromocoes),
+                numero("Quantidade de produtos em promoção", "qtdPromocoes", c.qtdPromocoes, 'min="1" max="24" step="1"', "Mostra os produtos que têm preço antigo cadastrado, maior que o preço atual."),
                 campo("Título da localização", "tituloLocalizacao", c.tituloLocalizacao), campo("Título do contato", "tituloContato", c.tituloContato))}
         ${area("Texto da seção de contato", "textoContato", c.textoContato)}
         ${titulo("Página de produtos")}

@@ -87,6 +87,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // títulos das seções
     $("#tit-categorias").textContent = config.tituloCategorias || "Categorias";
     $("#tit-destaques").textContent = config.tituloDestaques || "Produtos em destaque";
+    $("#tit-promocoes").textContent = config.tituloPromocoes || "Produtos em promoção";
     $("#tit-localizacao").textContent = config.tituloLocalizacao || "Localização";
     $("#tit-contato").textContent = config.tituloContato || "Contato";
 
@@ -176,6 +177,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!destaques.length) destaques = lista.filter((p) => p.estoque > 0); // sem destaques marcados: mostra os disponíveis
     $("#featured-container").innerHTML = destaques.slice(0, qtd).map(cardHtml).join("");
     $("#home-destaques").hidden = config.mostrarDestaques === false || destaques.length === 0;
+
+    const qtdPromo = Math.min(24, Math.max(1, parseInt(config.qtdPromocoes, 10) || 8));
+    const promos = lista.filter((p) => p.precoAntigo > p.preco);
+    $("#promo-container").innerHTML = promos.slice(0, qtdPromo).map(cardHtml).join("");
+    $("#home-promocoes").hidden = config.mostrarPromocoes === false || promos.length === 0;
     iniciarCarrosseis();
   };
 

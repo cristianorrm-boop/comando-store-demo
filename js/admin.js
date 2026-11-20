@@ -416,14 +416,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ---- Produtos ----
   let buscaProd = "";
+  let catProd = "todas";
   telas.produtos = async () => {
     carregando("produtos");
     const [produtos, categorias] = await Promise.all([DB.produtos.listar(), DB.categorias.listar()]);
     const cats = Object.fromEntries(categorias.map((c) => [c.id, c.nome]));
-    const lista = produtos.filter((p) => p.nome.toLowerCase().includes(buscaProd.toLowerCase())).sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+    const ordemCat = Object.fromEntries(categorias.map((c) => [c.id, c.ordem ?? Infinity]));
+    const categoriasOrdenadas = [...categorias].sort((a, b) => (a.ordem ?? Infinity) - (b.ordem ?? Infinity) || a.nome.localeCompare(b.nome, "pt-BR"));
+    const lista = produtos
+      .filter((p) => (catProd === "todas" || p.categoria === catProd) && p.nome.toLowerCase().includes(buscaProd.toLowerCase()))
+      .sort((a, b) => (ordemCat[a.categoria] ?? Infinity) - (ordemCat[b.categoria] ?? Infinity) || a.nome.localeCompare(b.nome, "pt-BR"));
     $("#tab-produtos").innerHTML = `
       <div class="cab"><h1>Produtos</h1><div class="barra-acoes"><button class="btn sec" id="exemplos-produtos" title="Adiciona produtos de exemplo de uma loja de acessórios"><i class="fa-solid fa-wand-magic-sparkles"></i> Adicionar exemplos</button><button class="btn" id="novo-produto"><i class="fa-solid fa-plus"></i> Novo produto</button></div></div>
-      <div class="filtros"><input id="busca-prod" placeholder="Buscar produto..." value="${esc(buscaProd)}" /></div>
+      <div class="filtros">
+        <input id="busca-prod" placeholder="Buscar produto..." value="${esc(buscaProd)}" />
+        <select id="prod-cat"><option value="todas">Todas as categorias</option>${categoriasOrdenadas.map((c) => `<option value="${esc(c.id)}" ${catProd === c.id ? "selected" : ""}>${esc(c.nome)}</option>`).join("")}</select>
+      </div>
       <table><thead><tr><th></th><th>Nome</th><th>Categoria</th><th>Preço</th><th>Estoque</th><th>Situação</th><th></th></tr></thead><tbody>
       ${lista.map((p) => `<tr>
         <td><img src="${esc(p.imagem)}" alt="" /></td><td>${esc(p.nome)}${p.destaque ? " ⭐" : ""}${p.variantes?.length ? ` <small style="color:var(--suave)">(${p.variantes.length} variações)</small>` : ""}</td><td>${esc(cats[p.categoria] || "—")}</td>
@@ -433,6 +441,7 @@ document.addEventListener("DOMContentLoaded", () => {
       </tbody></table>`;
     const b = $("#busca-prod");
     b.oninput = () => { buscaProd = b.value; telas.produtos().then(() => { const n = $("#busca-prod"); n.focus(); n.setSelectionRange(n.value.length, n.value.length); }); };
+    $("#prod-cat").onchange = (e) => { catProd = e.target.value; telas.produtos(); };
     $("#novo-produto").onclick = () => formProduto();
     $("#exemplos-produtos").onclick = async (e) => {
       if (!confirm("Adicionar produtos de exemplo de uma loja de acessórios (bijuterias, relógios, bolsas, óculos, carteiras, tech e cabelo)?\n\nNada será apagado e produtos com o mesmo nome não são repetidos.")) return;
